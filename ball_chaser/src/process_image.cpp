@@ -21,19 +21,39 @@ void drive_robot(float lin_x, float ang_z){
 void process_image_callback(const sensor_msgs::Image img){
 
     int white_pixel = 255;
-    
+    int left_bound = int(img.width / 3);
+    int right_bound = 2 * int(img.width / 3);
+    int right_count = 0; int mid_count = 0; int left_count = 0;
+    int max_count = 0;
     //Loop through each pixel in the image and check if there's a bright white one
-    for (i=0; i < img.height; i++){
-        for (j=0; j < img.width; j++){
-            if (img.data[i, j] = white_pixel){
+    for (int i = 0; i < img.height; i++){
+        for (int j = 0; j < img.step; j++){
+            int index = j + (i * img.step);
+            if (img.data[index] == white_pixel){
                 //Then, identify if this pixel falls in the left, mid, or right side of the image
-                //Depending on the white ball position, call the drive_bot function and pass velocities to it 
-                //Request a stop when there's no white ball seen by the camera
-            }
-            else{
+                if (i <= left_bound){
+                    left_count += 1;
+                } else if (i >= right_bound){
+                    right_count += 1;
+                } else {
+                    mid_count += 1;
+                }
+            } else{
                 continue;
             }
         }
+    }
+    //Depending on the white ball position, call the drive_bot function and pass velocities to it 
+    //Request a stop when there's no white ball seen by the camera
+    max_count = std::max(std::max(left_count, mid_count), right_count);
+    if (max_count == 0){
+        drive_robot(0.0, 0.0);
+    } else if (max_count == left_count){
+        drive_robot(0.5, 0.5);
+    } else if (max_count == right_count){
+        drive_robot(0.5, -0.5);
+    } else{
+        drive_robot(0.5, 0.0);
     }
     
 }
