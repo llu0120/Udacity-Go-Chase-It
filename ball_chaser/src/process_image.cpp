@@ -15,6 +15,9 @@ void drive_robot(float lin_x, float ang_z){
     srv.request.linear_x = lin_x;
     srv.request.angular_z = ang_z;
 
+    if (!client.call(srv)){
+        ROS_ERROR("Failed to call service DriveToTarget! ");
+    }
 }
 
 //Callback function continuously executes and reads the image data
@@ -29,11 +32,11 @@ void process_image_callback(const sensor_msgs::Image img){
     for (int i = 0; i < img.height; i++){
         for (int j = 0; j < img.step; j++){
             int index = j + (i * img.step);
-            if (img.data[index] == white_pixel){
+            if (img.data[index] == white_pixel && img.data[index + 1] == white_pixel && img.data[index + 2] == white_pixel){
                 //Then, identify if this pixel falls in the left, mid, or right side of the image
-                if (i <= left_bound){
+                if (j <= left_bound){
                     left_count += 1;
-                } else if (i >= right_bound){
+                } else if (j >= right_bound){
                     right_count += 1;
                 } else {
                     mid_count += 1;
@@ -43,6 +46,7 @@ void process_image_callback(const sensor_msgs::Image img){
             }
         }
     }
+    std::cout << "left_count: " << left_count << " ; mid_count: " << mid_count << " ; right_count: " << right_count << std::endl;
     //Depending on the white ball position, call the drive_bot function and pass velocities to it 
     //Request a stop when there's no white ball seen by the camera
     max_count = std::max(std::max(left_count, mid_count), right_count);
