@@ -1,1 +1,1 @@
-# Udacity-Go-Chase-It-
+# Udacity-Go-Chase-It
