@@ -30,7 +30,7 @@ void process_image_callback(const sensor_msgs::Image img){
     int max_count = 0;
     //Loop through each pixel in the image and check if there's a bright white one
     for (int i = 0; i < img.height; i++){
-        for (int j = 0; j < img.step; j++){
+        for (int j = 0; j < img.step; j += 3){
             int index = j + (i * img.step);
             if (img.data[index] == white_pixel && img.data[index + 1] == white_pixel && img.data[index + 2] == white_pixel){
                 //Then, identify if this pixel falls in the left, mid, or right side of the image
